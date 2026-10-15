@@ -342,6 +342,7 @@ That run checks only row 6. PASS means the resource group is gone.
 ## Architecture
 
 ```mermaid
+%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 50, "rankSpacing": 70}}}%%
 flowchart TD
     visitor["Visitor browser"]
     packages["Internet<br/>apt packages"]
