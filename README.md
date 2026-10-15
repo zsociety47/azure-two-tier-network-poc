@@ -344,7 +344,6 @@ That run checks only row 6. PASS means the resource group is gone.
 ```mermaid
 flowchart TD
     visitor["Visitor browser"]
-    deploy["python -m src.deploy"]
     packages["Internet<br/>apt packages"]
 
     subgraph rg["rg-twotier-poc-zeon01"]
@@ -369,21 +368,19 @@ flowchart TD
     vmtest -- "TCP 5432 denied" --> vmdb
     vmdb -- "outbound HTTPS" --> nat
     nat -- "package install" --> packages
-    deploy -. "create or update" .-> pip
-    deploy -. "create or update" .-> nat
 
     classDef azure fill:#0078d4,stroke:#005a9e,color:#fff
     classDef external fill:#6e7681,stroke:#484f58,color:#fff
 
     class pip,vmweb,vmdb,vmtest,nat azure
-    class visitor,deploy,packages external
+    class visitor,packages external
 ```
 
 **How to read this diagram**
 
 - **Solid arrows:** live traffic. HTTP lands on `pip-web-01`, which sits outside the virtual network, then on the web VM. PostgreSQL allows the web subnet and denies the test VM. The database VM has no public IP, so outbound package installs go through the NAT gateway and `pip-nat-01`.
-- **Dashed arrows:** `python -m src.deploy` creating those public resources. They point at nodes, not at the resource-group box.
-- **Blue:** Azure resources. **Gray:** the browser, the deploy command, and the internet.
+- **Blue:** Azure resources. **Gray:** the browser and the internet.
+- Python deploy creates these resources. It is not drawn as an arrow, so those lines do not wrap around the boxes.
 
 *Visitors reach nginx on the web VM. The database accepts PostgreSQL only from the web subnet. The NAT public IP is not attached to the database VM.*
 
