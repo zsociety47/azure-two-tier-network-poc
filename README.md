@@ -344,12 +344,14 @@ That run checks only row 6. PASS means the resource group is gone.
 ```mermaid
 flowchart TD
     visitor["Visitor browser"]
-    operator["Operator laptop<br/>Python deploy"]
+    deploy["python -m src.deploy"]
+    packages["Internet<br/>apt packages"]
 
     subgraph rg["rg-twotier-poc-zeon01"]
+        pip["pip-web-01<br/>Public IP"]
+        nat["nat-twotier-poc<br/>NAT Gateway · pip-nat-01"]
         subgraph vnet["vnet-twotier-poc · 10.0.0.0/16"]
             subgraph web["snet-web · nsg-web"]
-                pip["pip-web-01<br/>Public IP"]
                 vmweb["vm-web-01<br/>nginx"]
             end
             subgraph db["snet-db · nsg-db"]
@@ -359,30 +361,31 @@ flowchart TD
                 vmtest["vm-test-01<br/>Blocked-path check"]
             end
         end
-        nat["nat-twotier-poc<br/>NAT Gateway"]
     end
 
     visitor -- "HTTP port 80" --> pip
     pip -- "HTTP port 80" --> vmweb
     vmweb -- "TCP 5432 allowed" --> vmdb
     vmtest -- "TCP 5432 denied" --> vmdb
-    vmdb -- "package install" --> nat
-    operator -. "create or update" .-> rg
+    vmdb -- "outbound HTTPS" --> nat
+    nat -- "package install" --> packages
+    deploy -. "create or update" .-> pip
+    deploy -. "create or update" .-> nat
 
     classDef azure fill:#0078d4,stroke:#005a9e,color:#fff
     classDef external fill:#6e7681,stroke:#484f58,color:#fff
 
     class pip,vmweb,vmdb,vmtest,nat azure
-    class visitor,operator external
+    class visitor,deploy,packages external
 ```
 
 **How to read this diagram**
 
-- **Solid arrows:** how traffic moves while the system is running. The test VM's arrow is a connection that the database firewall denies.
-- **Dashed arrow:** how the Python deploy creates and updates the resource group.
-- **Blue:** Azure resources. **Gray:** the visitor and the laptop running the deploy.
+- **Solid arrows:** live traffic. HTTP lands on `pip-web-01`, which sits outside the virtual network, then on the web VM. PostgreSQL allows the web subnet and denies the test VM. The database VM has no public IP, so outbound package installs go through the NAT gateway and `pip-nat-01`.
+- **Dashed arrows:** `python -m src.deploy` creating those public resources. They point at nodes, not at the resource-group box.
+- **Blue:** Azure resources. **Gray:** the browser, the deploy command, and the internet.
 
-*Visitors reach nginx on the web VM. The database accepts PostgreSQL only from the web subnet. The NAT gateway is how the private database VM downloads packages, and that public IP is not attached to the VM.*
+*Visitors reach nginx on the web VM. The database accepts PostgreSQL only from the web subnet. The NAT public IP is not attached to the database VM.*
 
 *Diagram follows the [shared diagram standard](https://github.com/zsociety47/cloud-projects/blob/main/standards/DIAGRAM-STANDARD.md).*
 
