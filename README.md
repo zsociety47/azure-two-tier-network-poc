@@ -255,7 +255,11 @@ ssh -i keys/id_ed25519 -J azureuser@<web public IP> azureuser@10.0.2.4
 
 ### Run this as yourself
 
-The names in `src/lib/config.py` are this proof of concept. Before you deploy, change `RESOURCE_GROUP` (it must be unique in your subscription), `TAGS["owner"]`, and any other value that includes `zeon`. Globally unique Azure names cannot stay as `zeon01`. The portal walkthrough already says `owner = <your name>`.
+The names committed in this repository are this proof of concept. Leave the published file as it is; change the constants in **your** copy before you deploy. The sequence is the same as the [naming standard](https://github.com/zsociety47/cloud-projects/blob/main/standards/NAMING-STANDARD.md): type, project, environment, then **your** owner word and number (`rg-twotier-poc-zeon01` becomes `rg-twotier-poc-ada01`). The portal walkthrough already says `owner = <your name>`.
+
+| Open this | Do this |
+|---|---|
+| [`src/lib/config.py`](src/lib/config.py) | Change `RESOURCE_GROUP` to `rg-twotier-poc-<yourword>01`. Change `TAGS["owner"]` to you. Leave `vnet-twotier-poc` and the subnet, virtual machine, and firewall names; they only have to be unique in your group. |
 
 You need Python 3.11 or newer, an Azure subscription, and a current `az login` so the scripts can sign in. They use `DefaultAzureCredential` from the Azure software development kit (SDK). No password is stored in the repository.
 
