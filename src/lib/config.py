@@ -1,7 +1,8 @@
 """Names, addresses, and tags for the two-tier proof of concept.
 
 Every Azure resource this project creates is listed here so deploy, verify,
-and teardown stay in agreement.
+and teardown stay in agreement. If you are not zeon, change RESOURCE_GROUP
+and TAGS["owner"] before you deploy. The resource group name must be yours.
 """
 
 from dataclasses import dataclass

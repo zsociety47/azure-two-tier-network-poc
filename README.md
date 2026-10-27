@@ -253,6 +253,10 @@ ssh -i keys/id_ed25519 -J azureuser@<web public IP> azureuser@10.0.2.4
 
 ## Automated setup
 
+### Run this as yourself
+
+The names in `src/lib/config.py` are this proof of concept. Before you deploy, change `RESOURCE_GROUP` (it must be unique in your subscription), `TAGS["owner"]`, and any other value that includes `zeon`. Globally unique Azure names cannot stay as `zeon01`. The portal walkthrough already says `owner = <your name>`.
+
 You need Python 3.11 or newer, an Azure subscription, and a current `az login` so the scripts can sign in. They use `DefaultAzureCredential` from the Azure software development kit (SDK). No password is stored in the repository.
 
 From the repository root:
