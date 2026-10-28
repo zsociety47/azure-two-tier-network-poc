@@ -10,7 +10,7 @@ Face on camera for the introduction, the architecture, and the close. Click the 
 
 ## At a glance
 
-- **What it is:** a small website and a database on Microsoft Azure, split so the database is not on the internet.
+- **What it is:** a small website and a database on Microsoft Azure, split so the database isn't on the internet.
 - **What's automated:** one Python command builds the network, the web server, the database, and a test machine. A second command checks the result. A third deletes it.
 - **Why it's secure:** the database virtual machine (VM) has no public Internet Protocol (IP) address. A firewall on its subnet accepts the database port only from the web subnet, then denies every other address inside the virtual network (VNet).
 - **Result:** every goal was met. The web page showed a live database, a second machine in the VNet was blocked, and teardown removed the resource group.
@@ -38,7 +38,7 @@ mkdir -p keys
 ssh-keygen -t ed25519 -f keys/id_ed25519 -N ""
 ```
 
-Find your current public Internet Protocol (IP) address. Open `https://api.ipify.org` in a browser. The page shows one address. You will use `<that address>/32` as the only source allowed to SSH to the web VM. Do not commit that address.
+Find your current public Internet Protocol (IP) address. Open `https://api.ipify.org` in a browser. The page shows one address. You will use `<that address>/32` as the only source allowed to SSH to the web VM. Don't commit that address.
 
 ### Step 1: Create a resource group
 
@@ -59,7 +59,7 @@ Find your current public Internet Protocol (IP) address. Open `https://api.ipify
 
 *Automated by `python -m src.deploy`.*
 
-The web VM and the NAT gateway each need a public IP address that already exists. Create both before either consumer.
+The web VM and the NAT gateway each need a public IP address that already exists. Create both before the things that use them.
 
 1. Search for **Public IP addresses** and select **+ Create**.
 2. **Name:** `pip-web-01`. **Resource group:** `rg-twotier-poc-zeon01`. **Region:** East US.
@@ -74,12 +74,12 @@ The web VM and the NAT gateway each need a public IP address that already exists
 
 *Automated by `python -m src.deploy`.*
 
-New VNets use private subnets, so a VM with no public IP cannot download packages unless you add an explicit outbound path. The database subnet gets that path here. The gateway is created now, and attached to `snet-db` in step 7, because the subnet does not exist yet.
+New VNets use private subnets, so a VM with no public IP can't download packages unless you add an explicit outbound path. The database subnet gets that path here. The gateway is created now, and attached to `snet-db` in step 7, because the subnet doesn't exist yet.
 
 1. Search for **NAT gateways** and select **+ Create**.
-2. **Name:** `nat-twotier-poc`. **Region:** East US. **SKU:** Standard. The form often opens on StandardV2. Change it to Standard. A StandardV2 gateway cannot use `pip-nat-01`, because that address is Standard.
+2. **Name:** `nat-twotier-poc`. **Region:** East US. **SKU:** Standard. The form often opens on StandardV2. Change it to Standard. A StandardV2 gateway can't use `pip-nat-01`, because that address is Standard.
 3. **TCP idle timeout:** 4 minutes. TCP is the Transmission Control Protocol.
-4. **Public IP:** select the existing `pip-nat-01`. Do not create a new one.
+4. **Public IP:** select the existing `pip-nat-01`. Don't create a new one.
 5. Leave the subnet blank for now. Select **Review + create**, then **Create**.
 
 ![NAT gateway using pip-nat-01](docs/images/step-03-nat.png)
@@ -88,7 +88,7 @@ New VNets use private subnets, so a VM with no public IP cannot download package
 
 *Automated by `python -m src.deploy`.*
 
-A network security group (NSG) is the subnet firewall. Create it now. Attach it to `snet-web` in step 7, when that subnet is created. Do not also put a firewall on the VM's network interface. Two firewalls are easy to set and then forget.
+A network security group (NSG) is the subnet firewall. Create it now. Attach it to `snet-web` in step 7, when that subnet is created. Don't also put a firewall on the VM's network interface. Two firewalls are easy to set and then forget.
 
 1. Search for **Network security groups** and select **+ Create**.
 2. **Name:** `nsg-web`. **Resource group:** `rg-twotier-poc-zeon01`. **Region:** East US.
@@ -99,7 +99,7 @@ A network security group (NSG) is the subnet firewall. Create it now. Attach it 
 | Allow-Http-Internet | 100 | Any | 80 | TCP | Allow |
 | Allow-Ssh-Operator | 110 | Your current public IP address, as a `/32` | 22 | TCP | Allow |
 
-Hypertext Transfer Protocol (HTTP) is port 80. Limiting SSH to your current public address means the rest of the internet cannot log in to the web VM.
+Hypertext Transfer Protocol (HTTP) is port 80. Limiting SSH to your current public address means the rest of the internet can't log in to the web VM.
 
 ![Web subnet inbound rules](docs/images/step-04-nsg-web.png)
 
@@ -107,7 +107,7 @@ Hypertext Transfer Protocol (HTTP) is port 80. Limiting SSH to your current publ
 
 *Automated by `python -m src.deploy`.*
 
-This is the rule that makes the proof true. Azure already has a built-in inbound rule, AllowVnetInBound, at priority 65000. A lower number wins, and that built-in rule allows every address in the VNet. An allow rule for the web subnet does not, by itself, stop anyone else in the VNet. The deny rule at priority 200 has to sit above that default.
+This is the rule that makes the proof true. Azure already has a built-in inbound rule, AllowVnetInBound, at priority 65000. A lower number wins, and that built-in rule allows every address in the VNet. An allow rule for the web subnet doesn't, by itself, stop anyone else in the VNet. The deny rule at priority 200 has to sit above that default.
 
 1. Create an NSG named `nsg-db` in the same resource group and region.
 2. Add these inbound rules:
@@ -119,7 +119,7 @@ This is the rule that makes the proof true. Azure already has a built-in inbound
 | Allow-Icmp-From-Web | 120 | `10.0.1.0/24` | Any | Internet Control Message Protocol (ICMP) | Allow |
 | Deny-Other-Vnet | 200 | Service tag **VirtualNetwork** | Any | Any | Deny |
 
-Port 5432 is PostgreSQL. ICMP is what `ping` uses. The real proof is the TCP check on 5432, from the web VM and from the test VM. Do not associate the NSG yet.
+Port 5432 is PostgreSQL. ICMP is what `ping` uses. The real proof is the TCP check on 5432, from the web VM and from the test VM. Don't associate the NSG yet.
 
 ![Database subnet rules, including the deny](docs/images/step-05-nsg-db.png)
 
@@ -150,7 +150,7 @@ The test VM exists so a machine that is inside the VNet, and outside the web sub
 
 4. Select **Review + create**, then **Create**.
 
-The web VM gets out through `pip-web-01`. The database subnet gets out through `nat-twotier-poc`. The test subnet does not need the internet.
+The web VM gets out through `pip-web-01`. The database subnet gets out through `nat-twotier-poc`. The test subnet doesn't need the internet.
 
 ![Virtual network with three subnets](docs/images/step-07-vnet.png)
 
@@ -161,7 +161,7 @@ The web VM gets out through `pip-web-01`. The database subnet gets out through `
 Every VM in this project uses the same machine settings. The networking is what changes.
 
 - **Image:** Ubuntu Server 24.04 Long Term Support (LTS)
-- **Size:** Standard_F1als_v7 (1 vCPU, 2 GB of memory). Standard_B1s was the first choice. This subscription cannot create that size in East US.
+- **Size:** Standard_F1als_v7 (1 vCPU, 2 GB of memory). Standard_B1s was the first choice. This subscription can't create that size in East US.
 - **Username:** `azureuser`
 - **Authentication:** SSH public key. Paste `keys/id_ed25519.pub`. Password authentication stays off.
 - **OS disk:** 30 GB, Standard SSD, locally redundant storage (Standard SSD LRS). SSD is a solid-state drive. Delete the disk when the VM is deleted.
@@ -170,9 +170,9 @@ Every VM in this project uses the same machine settings. The networking is what 
 
 1. Search for **Virtual machines** and select **+ Create** > **Azure virtual machine**.
 2. **Resource group:** `rg-twotier-poc-zeon01`. **Name:** `vm-web-01`. **Region:** East US. Apply the shared settings above.
-3. **Networking:** virtual network `vnet-twotier-poc`, subnet `snet-web`. **Public IP:** select the existing `pip-web-01`. Do not click **Create new**. **NIC network security group:** None. Check **Delete NIC when VM is deleted**. Leave **Delete public IP when VM is deleted** unchecked. This size requires accelerated networking, so leave that box as the portal sets it. **Load balancing:** None.
+3. **Networking:** virtual network `vnet-twotier-poc`, subnet `snet-web`. **Public IP:** select the existing `pip-web-01`. Don't click **Create new**. **NIC network security group:** None. Check **Delete NIC when VM is deleted**. Leave **Delete public IP when VM is deleted** unchecked. This size requires accelerated networking, so leave that box as the portal sets it. **Load balancing:** None.
 4. Select **Review + create**, then **Create**.
-5. The portal names the network interface for you and gives it a dynamic private address. This form has no field for `nic-web-01` or `10.0.1.4`. A network interface cannot be renamed later. `python -m src.deploy` still creates `nic-web-01` with that address. After the VM exists, open it, select **Network settings**, select the network interface, then **IP configurations**, then `ipconfig1`. Set the assignment to Static and the address to `10.0.1.4`, then save. The VM restarts.
+5. The portal names the network interface for you and gives it a dynamic private address. This form has no field for `nic-web-01` or `10.0.1.4`. A network interface can't be renamed later. `python -m src.deploy` still creates `nic-web-01` with that address. After the VM exists, open it, select **Network settings**, select the network interface, then **IP configurations**, then `ipconfig1`. Set the assignment to Static and the address to `10.0.1.4`, then save. The VM restarts.
 
 ![Web VM with a public IP on snet-web](docs/images/step-08-vm-web.png)
 
@@ -201,9 +201,9 @@ Every VM in this project uses the same machine settings. The networking is what 
 
 The database is installed first. The page has nothing to connect to until PostgreSQL is listening.
 
-By hand, open the VM and use **Run command** > **RunShellScript**. Do not put the script in the VM's custom data. Custom data is visible later in the portal.
+By hand, open the VM and use **Run command** > **RunShellScript**. Don't put the script in the VM's custom data. Custom data is visible later in the portal.
 
-1. Pick a database password in your own session. In a copy of `src/guest/db-setup.sh`, replace `__DB_PASSWORD__` with that password. Paste the copy into Run command on `vm-db-01`. Do not save the filled-in script, and do not commit it.
+1. Pick a database password in your own session. In a copy of `src/guest/db-setup.sh`, replace `__DB_PASSWORD__` with that password. Paste the copy into Run command on `vm-db-01`. Don't save the filled-in script, and don't commit it.
 2. The script is finished when the output includes `DB_READY`. PostgreSQL listens on `10.0.2.4` only. It allows the web subnet `10.0.1.0/24` with a SCRAM-SHA-256 password. SCRAM-SHA-256 is the password handshake. The database role is `webapp`. The database name is `appdb`.
 3. Replace the same placeholder in a copy of `src/guest/web-setup.sh` and run that copy on `vm-web-01`. Wait until the output includes `WEB_READY`.
 4. Leave `vm-test-01` as it is. It only needs the TCP check in the next step.
@@ -224,7 +224,7 @@ The web page is nginx on port 80, forwarding to a small Python app on `127.0.0.1
 timeout 8 bash -c 'echo >/dev/tcp/10.0.2.4/5432'; echo $?
 ```
 
-`0` means the port opened. That is the pass for the web VM.
+`0` means the port opened. That's the pass for the web VM.
 
 4. Run the same command on `vm-test-01`. `124` means it timed out. A timeout is the pass for the test VM: the firewall dropped the packet. A fast refusal would mean the packet reached PostgreSQL.
 5. SSH to the database goes through the web VM. The private key stays on your machine:
@@ -233,7 +233,7 @@ timeout 8 bash -c 'echo >/dev/tcp/10.0.2.4/5432'; echo $?
 ssh -i keys/id_ed25519 -J azureuser@<web public IP> azureuser@10.0.2.4
 ```
 
-`-J` is ProxyJump. Your machine connects to the web VM first, then from there to `10.0.2.4`. The same pattern reaches the test VM at `10.0.3.4`. Do not copy `keys/id_ed25519` onto the web VM.
+`-J` is ProxyJump. Your machine connects to the web VM first, then from there to `10.0.2.4`. The same pattern reaches the test VM at `10.0.3.4`. Don't copy `keys/id_ed25519` onto the web VM.
 
 ![Web VM run command prints 0](docs/images/step-12-web-open.png)
 
@@ -255,11 +255,11 @@ ssh -i keys/id_ed25519 -J azureuser@<web public IP> azureuser@10.0.2.4
 
 ### Run this as yourself
 
-The names committed in this repository are this proof of concept. Leave the published file as it is; change the constants in **your** copy before you deploy. The sequence is the same as the [naming standard](https://github.com/zsociety47/cloud-projects/blob/main/standards/NAMING-STANDARD.md): type, project, environment, then **your** owner word and number (`rg-twotier-poc-zeon01` becomes `rg-twotier-poc-ada01`). The portal walkthrough already says `owner = <your name>`.
+The names in this repository are the ones I used for my own proof of concept, so leave the published file as it is and change the constants in your own copy before you deploy. The names follow the [naming standard](https://github.com/zsociety47/cloud-projects/blob/main/standards/NAMING-STANDARD.md): type, project, environment, then your short name and a number (`rg-twotier-poc-zeon01` becomes `rg-twotier-poc-ada01`). The portal walkthrough already tells you to set `owner = <your name>`.
 
 | Open this | Do this |
 |---|---|
-| [`src/lib/config.py`](src/lib/config.py) | Change `RESOURCE_GROUP` to `rg-twotier-poc-<yourword>01`. Change `TAGS["owner"]` to you. Leave `vnet-twotier-poc` and the subnet, virtual machine, and firewall names; they only have to be unique in your group. |
+| [`src/lib/config.py`](src/lib/config.py) | Change `RESOURCE_GROUP` to `rg-twotier-poc-<your-short-name>01`, and change `TAGS["owner"]` to your own name. Leave `vnet-twotier-poc` and the subnet, virtual machine, and firewall names alone; they only have to be unique inside your resource group. |
 
 You need Python 3.11 or newer, an Azure subscription, and a current `az login` so the scripts can sign in. They use `DefaultAzureCredential` from the Azure software development kit (SDK). No password is stored in the repository.
 
@@ -274,9 +274,9 @@ python -m src.deploy
 python -m src.verify
 ```
 
-`--plan` prints the resource names and exits. It does not call Azure.
+`--plan` prints the resource names and exits. It doesn't call Azure.
 
-`python -m src.deploy` replaces the SSH key and steps 1 through 11. It is safe to run again: existing resources are updated, and an existing VM is left in place. The database password is generated in memory for that run, sent to the two VMs, and never printed.
+`python -m src.deploy` covers the SSH key and steps 1 through 11. It's safe to run again: existing resources are updated, and an existing VM is left in place. The database password is generated in memory for that run, sent to the two VMs, and never printed.
 
 <!-- ![Deploy finished and printed the web address](docs/images/automated-deploy.png) -->
 
@@ -284,7 +284,7 @@ python -m src.verify
 
 <!-- ![Verify pass table, check 6 not run](docs/images/automated-verify.png) -->
 
-When you are finished:
+When you're finished:
 
 ```bash
 python -m src.teardown
@@ -303,9 +303,9 @@ Sign in with the Azure command-line interface (CLI) in a browser before the Pyth
 az login
 ```
 
-Deploy reads that session. It does not read a password from this repository. If Microsoft Entra ID asks for multi-factor authentication (MFA), approve the prompt in the browser. Do not add `--use-device-code`. That flow is often blocked when the computer is not registered with Entra ID. The page then says the sign-in succeeded and the device is unregistered. A browser `az login` is the path this project uses.
+Deploy reads that session. It doesn't read a password from this repository. If Microsoft Entra ID asks for multi-factor authentication (MFA), approve the prompt in the browser. Don't add `--use-device-code`. That flow is often blocked when the computer isn't registered with Entra ID. The page then says the sign-in worked but the device is unregistered. This project uses a regular browser `az login` instead.
 
-Someone who clones the repository signs in to their own tenant. They are not affected by this tenant's device policy. They do get an MFA prompt when their own tenant requires one. Their subscription may also allow a smaller virtual machine size. This subscription cannot, so the size in the code stays `Standard_F1als_v7`.
+If you clone this repository, you sign in to your own tenant, so my tenant's device policy doesn't apply to you. You'll only get a multi-factor authentication prompt if your tenant requires one. Your subscription might also allow a smaller virtual machine size. Mine doesn't, which is why the size in the code stays `Standard_F1als_v7`.
 
 ### Prove it in the portal
 
@@ -314,17 +314,17 @@ After `python -m src.deploy` prints a web address, these pages are the same chec
 | Check | Where to click | A pass looks like |
 |---|---|---|
 | 1. The page reaches the database | The address deploy printed, in a browser | The body contains `database-connected` and a PostgreSQL version |
-| 2. The database is not on the internet | `nic-db-01` → **IP configurations** | Public IP is empty. Private IP is `10.0.2.4` |
+| 2. The database isn't on the internet | `nic-db-01` → **IP configurations** | Public IP is empty. Private IP is `10.0.2.4` |
 | 3. The web tier can open port 5432 | `vm-web-01` → **Run command** → **RunShellScript** | `timeout 8 bash -c 'echo >/dev/tcp/10.0.2.4/5432'; echo $?` prints `0` |
-| 4. A machine outside the web subnet cannot | `vm-test-01` → the same Run command | The same command prints `124`. That timeout means the firewall dropped the packet |
+| 4. A machine outside the web subnet can't | `vm-test-01` → the same Run command | The same command prints `124`. That timeout means the firewall dropped the packet |
 | 5. Database SSH is only from the web subnet | `nsg-db` → **Inbound security rules** | Port 5432 and port 22 allow `10.0.1.0/24`. Priority 200 denies **VirtualNetwork**. `nic-db-01` still has no public IP |
-| 6. Teardown removed the group | **Resource groups** | `rg-twotier-poc-zeon01` is not in the list |
+| 6. Teardown removed the group | **Resource groups** | `rg-twotier-poc-zeon01` isn't in the list |
 
 ### Prove it from the command line
 
 `python -m src.verify` runs checks 1 through 5 and prints a pass/fail table. Check 6 stays "not run" because the group still exists. The command also prints the web address it requested.
 
-A passing table is:
+A passing table looks like this:
 
 | # | Result |
 |---|---|
@@ -389,9 +389,9 @@ flowchart TD
 
 - **Solid arrows:** live traffic. HTTP lands on `pip-web-01`, which sits outside the virtual network, then on the web VM. PostgreSQL allows the web subnet and denies the test VM. The database VM has no public IP, so outbound package installs go through the NAT gateway and `pip-nat-01`.
 - **Blue:** Azure resources. **Gray:** the browser and the internet.
-- Python deploy creates these resources. It is not drawn as an arrow, so those lines do not wrap around the boxes.
+- Python deploy creates these resources. It isn't drawn as an arrow, so those lines don't wrap around the boxes.
 
-*Visitors reach nginx on the web VM. The database accepts PostgreSQL only from the web subnet. The NAT public IP is not attached to the database VM.*
+*Visitors reach nginx on the web VM. The database accepts PostgreSQL only from the web subnet. The NAT public IP isn't attached to the database VM.*
 
 *Diagram follows the [shared diagram standard](https://github.com/zsociety47/cloud-projects/blob/main/standards/DIAGRAM-STANDARD.md).*
 
@@ -431,11 +431,11 @@ A database VM with no public IP, in a private subnet, is reachable on the databa
 
 ## Security choices
 
-- **No public IP on the database or the test VM.** There is no internet route to PostgreSQL or to SSH on those machines.
-- **Subnet NSGs, with an explicit deny.** Allowing the web subnet is not enough. Priority 200 denies every other VNet source before the built-in allow at priority 65000 is considered.
+- **No public IP on the database or the test VM.** There's no internet route to PostgreSQL or to SSH on those machines.
+- **Subnet NSGs, with an explicit deny.** Allowing the web subnet isn't enough. Priority 200 denies every other VNet source before the built-in allow at priority 65000 is considered.
 - **PostgreSQL listens on the private address only**, and its host rule accepts `10.0.1.0/24` on port 5432. The NSG is the network control. The database config is a second check.
 - **SSH from the internet reaches only the web VM, and only from the public address this computer had at deploy time.** Database SSH is allowed from `10.0.1.0/24`. You reach it with ProxyJump. The private key stays in `keys/` on your machine.
-- **The database password is generated when deploy runs.** It is not printed, not written into this repository, and not stored in the VM's custom data. It is sent with Run Command, which Azure can keep in that operation's history until the resource group is deleted.
+- **The database password is generated when deploy runs.** It is not printed, not written into this repository, and not stored in the VM's custom data. It's sent with Run Command, which Azure can keep in that operation's history until the resource group is deleted.
 - **Sign-in uses the Azure CLI session you already have.** `DefaultAzureCredential` picks that up. This repository has no `.env` file and no stored keys.
 
 ## Cost
@@ -449,14 +449,14 @@ East US pay-as-you-go list prices, approximate, before tax:
 | NAT gateway | $0.045 per hour, plus about $0.045 per gigabyte processed |
 | Three 30 GB operating-system disks | a few dollars a month |
 
-A few hours for a recording is a few dollars. Left running for a month, the three virtual machines are about $130 and the NAT gateway is about $33. Delete the resource group when you are done. This build was deleted after the checks passed. Prices were checked in October 2026 and will move. Standard_B1s would have been about $0.0104 per hour, and this subscription cannot create that size in East US.
+A few hours for a recording is a few dollars. Left running for a month, the three virtual machines are about $130 and the NAT gateway is about $33. Delete the resource group when you're done. This build was deleted after the checks passed. Prices were checked in October 2026 and will move. Standard_B1s would have been about $0.0104 per hour, and this subscription can't create that size in East US.
 
 Standard locally redundant disks are enough for a proof of concept. A production database would use a managed PostgreSQL service and zone-redundant storage instead of a single VM.
 
 ## Going further
 
-- Replace `vm-db-01` with Azure Database for PostgreSQL and a private endpoint, so there is no database operating system to patch.
-- Replace the SSH jump with Azure Bastion, so port 22 is not open even to one public address.
+- Replace `vm-db-01` with Azure Database for PostgreSQL and a private endpoint, so there's no database operating system to patch.
+- Replace the SSH jump with Azure Bastion, so port 22 isn't open even to one public address.
 - Describe the same network in Bicep or Terraform once the design stops changing.
 
 ---
@@ -465,9 +465,9 @@ Standard locally redundant disks are enough for a proof of concept. A production
 
 *For engineers: what actually happened while building this, including the errors.*
 
-- **Standard_B1s could not be created in East US.** The first deploy built the network, then Azure returned `SkuNotAvailable`: this subscription is not allowed to create `Standard_B1s` there, and the same block covers the other small B-series sizes. The virtual machines were switched to `Standard_F1als_v7` (1 vCPU, 2 GB). A second deploy reused the resource group, firewalls, and subnets and created the machines. The larger size costs more. It also gives PostgreSQL more memory than the 1 GB B-series size would have.
-- **An allow rule for the web subnet does not lock the database down.** AllowVnetInBound (priority 65000) already permits any VNet source. `nsg-db` therefore allows `10.0.1.0/24` on TCP 5432 at priority 100, then denies source `VirtualNetwork` on every port at priority 200. The first matching rule wins, so web-subnet traffic hits the allow, and every other VNet address hits the deny. The test VM in `10.0.3.0/24` is how that deny is proved. A timeout means the firewall dropped the packet. An immediate refusal would mean the packet reached PostgreSQL, which would be a failed check.
-- **New VNets no longer get free outbound internet.** For Azure application programming interface (API) versions released after March 31, 2026, subnets in a new VNet have `defaultOutboundAccess` set to false. The web VM still reaches the internet because its network interface has a public IP. The database VM does not, so `snet-db` is attached to a NAT gateway for `apt`. The test VM never installs packages, so it has neither a public IP nor a NAT gateway. See [Default outbound access](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access).
-- **The password is kept out of the repository and out of the VM model.** `customData` is visible on the VM in the portal, so deploy does not use it. Run Command can still retain the script text in Azure until teardown. The scripts in git contain the placeholder `__DB_PASSWORD__` only. Deploy output is redacted, and Azure errors from that call are not printed, because the error body can include the script.
-- **Re-running deploy does not replace a VM that already exists.** Network resources use create-or-update. A second run generates a new database password and sends the install scripts again, so the web page and PostgreSQL stay in agreement. The SSH private key is created once and then reused.
-- **A cached Azure CLI login can fail when deploy asks for a new token.** Microsoft Entra ID returned `AADSTS50076`: multi-factor authentication is required before Azure Resource Manager will issue a token. A later device-code login returned error `530035` with the device marked unregistered. Browser `az login` is the sign-in this project uses. Cloning the repository does not copy that tenant policy onto someone else's machine.
+- **Standard_B1s could not be created in East US.** The first deploy built the network, then Azure returned `SkuNotAvailable`: this subscription isn't allowed to create `Standard_B1s` there, and the same block covers the other small B-series sizes. The virtual machines were switched to `Standard_F1als_v7` (1 vCPU, 2 GB). A second deploy reused the resource group, firewalls, and subnets and created the machines. The larger size costs more. It also gives PostgreSQL more memory than the 1 GB B-series size would have.
+- **An allow rule for the web subnet doesn't lock the database down.** AllowVnetInBound (priority 65000) already permits any VNet source. `nsg-db` therefore allows `10.0.1.0/24` on TCP 5432 at priority 100, then denies source `VirtualNetwork` on every port at priority 200. The first matching rule wins, so web-subnet traffic hits the allow, and every other VNet address hits the deny. The test VM in `10.0.3.0/24` is how that deny is proved. A timeout means the firewall dropped the packet. An immediate refusal would mean the packet reached PostgreSQL, which would be a failed check.
+- **New VNets no longer get free outbound internet.** For Azure application programming interface (API) versions released after March 31, 2026, subnets in a new VNet have `defaultOutboundAccess` set to false. The web VM still reaches the internet because its network interface has a public IP. The database VM doesn't, so `snet-db` is attached to a NAT gateway for `apt`. The test VM never installs packages, so it has neither a public IP nor a NAT gateway. See [Default outbound access](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access).
+- **The password is kept out of the repository and out of the VM model.** `customData` is visible on the VM in the portal, so deploy doesn't use it. Run Command can still retain the script text in Azure until teardown. The scripts in git contain the placeholder `__DB_PASSWORD__` only. Deploy output is redacted, and Azure errors from that call aren't printed, because the error body can include the script.
+- **Re-running deploy doesn't replace a VM that already exists.** Network resources use create-or-update. A second run generates a new database password and sends the install scripts again, so the web page and PostgreSQL stay in agreement. The SSH private key is created once and then reused.
+- **A cached Azure CLI login can fail when deploy asks for a new token.** Microsoft Entra ID returned `AADSTS50076`: multi-factor authentication is required before Azure Resource Manager will issue a token. A later device-code login returned error `530035` with the device marked unregistered. Browser `az login` is the sign-in this project uses. Cloning the repository doesn't copy that tenant policy onto someone else's machine.
